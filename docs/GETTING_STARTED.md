@@ -7,28 +7,12 @@ This document provides basic instructions for training and evaluation using **py
 
 ## Training Models
 
-Training on CIFAR with 1 GPU: 
+Training on ImageNet with 8 GPUs:
 
 ```
 python tools/train_net.py \
-    --cfg configs/archive/cifar/resnet/R-56_nds_1gpu.yaml \
-    OUT_DIR /tmp
-```
-
-Training on ImageNet with 1 GPU:
-
-```
-python tools/train_net.py \
-    --cfg configs/archive/imagenet/resnet/R-50-1x64d_step_1gpu.yaml \
-    OUT_DIR /tmp
-```
-
-Training on ImageNet with 2 GPUs:
-
-```
-python tools/train_net.py \
-    --cfg configs/archive/imagenet/resnet/R-50-1x64d_step_2gpu.yaml \
-    OUT_DIR /tmp
+    --cfg configs/R-50-1x64d_step_8gpu.yaml \
+    OUT_DIR ./output
 ```
 
 ## Finetuning Models
