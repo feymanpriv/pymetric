@@ -3,16 +3,32 @@
     based on 
     https://github.com/JDAI-CV/fast-reid/blob/master/fastreid/modeling/heads/linear_head.py
 """
+import torch
+from torch import nn
 
-from metric.core.config import cfg
-from metric.modeling.layers import *
 import metric.core.net as net
+from metric.core.config import cfg
+from metric.modeling.layers import Arcface, Circle
+from metric.modeling.layers import GeneralizedMeanPoolingP, AdaptiveAvgMaxPool2d, FastGlobalAvgPool2d
 
 
 class LinearHead(nn.Module):
-    def __init__(self, cfg, in_feat, num_classes, pool_layer):
+    def __init__(self, cfg, in_feat, num_classes):
         super().__init__()
-        self.pool_layer = pool_layer
+
+        pool_type = cfg.MODEL.HEADS.POOL_LAYER
+        if pool_type == 'avgpool':      
+            self.pool_layer = FastGlobalAvgPool2d()
+        elif pool_type == 'maxpool':    
+            self.pool_layer = nn.AdaptiveMaxPool2d(1)
+        elif pool_type == 'gempool':    
+            self.pool_layer = GeneralizedMeanPoolingP()
+        elif pool_type == "avgmaxpool": 
+            self.pool_layer = AdaptiveAvgMaxPool2d()
+        elif pool_type == "identity":   
+            self.pool_layer = nn.Identity()
+        else:
+            raise KeyError(f"{pool_type} is invalid")
 
         # identity classification layer
         cls_type = cfg.MODEL.HEADS.CLS_LAYER

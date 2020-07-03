@@ -9,22 +9,28 @@
 
 import torch
 from metric.core.config import cfg
-from metric.modeling.backbones.resnet import ResNet
+from metric.modeling.backbones import ResNet
 from metric.modeling.losses import CircleLoss
+from metric.modeling.heads import  LinearHead 
 
 # Supported models
 #_models = {"anynet": AnyNet, "effnet": EffNet, "resnet": ResNet, "regnet": RegNet}
 _models = {"resnet": ResNet}
-
 # Supported loss functions
 _loss_funs = {"CircleLoss": CircleLoss}
-
+_heads = {"LinearHead": LinearHead}
 
 def get_model():
     """Gets the model class specified in the config."""
     err_str = "Model type '{}' not supported"
     assert cfg.MODEL.TYPE in _models.keys(), err_str.format(cfg.MODEL.TYPE)
     return _models[cfg.MODEL.TYPE]
+
+
+def get_head():
+    err_str = "Head type '{}' not supported"
+    assert cfg.MODEL.HEADS.NAME in _heads.keys(), err_str.format(cfg.MODEL.HEADS.NAME)
+    return _heads[cfg.MODEL.HEADS.NAME]    
 
 
 def get_loss_fun():
@@ -41,12 +47,22 @@ def build_model():
 
 def build_loss_fun():
     """Build the loss function."""
-    return get_loss_fun()()
+    return get_loss_fun()(cfg)
+
+
+def build_head():
+    """ Build the head """
+    return get_head()()
 
 
 def register_model(name, ctor):
     """Registers a model dynamically."""
     _models[name] = ctor
+
+
+def register_head(name, ctor):
+    """Registers a head dynamically."""
+    _heads[name] = ctor
 
 
 def register_loss_fun(name, ctor):

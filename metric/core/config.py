@@ -40,11 +40,34 @@ _C.MODEL.NUM_CLASSES = 10
 # Loss function (see pycls/models/loss.py for options)
 _C.MODEL.LOSS_FUN = "CircleLoss"
 
+
 # Circle Loss options
-_C.MODEL.LOSSES.CIRCLE = CN()
+_C.MODEL.LOSSES.CIRCLE = CfgNode()
 _C.MODEL.LOSSES.CIRCLE.MARGIN = 0.25
 _C.MODEL.LOSSES.CIRCLE.ALPHA = 128
 _C.MODEL.LOSSES.CIRCLE.SCALE = 1.0
+
+
+# ------------------------------------------------------------------------------------ #
+# Heads options
+# ------------------------------------------------------------------------------------
+_C.MODEL.HEADS = CfgNode()
+_C.MODEL.HEADS.NAME = "LinearHead"
+# Normalization method for the convolution layers.
+# Number of identity
+_C.MODEL.HEADS.NUM_CLASSES = 1000
+# Input feature dimension
+_C.MODEL.HEADS.IN_FEAT = 2048
+# Reduction dimension in head
+_C.MODEL.HEADS.REDUCTION_DIM = 512
+# Pooling layer type
+_C.MODEL.HEADS.POOL_LAYER = "avgpool"
+# Classification layer type
+_C.MODEL.HEADS.CLS_LAYER = "linear"  # "arcface" or "circle"
+# Margin and Scale for margin-based classification layer
+_C.MODEL.HEADS.MARGIN = 0.15
+_C.MODEL.HEADS.SCALE = 128
+
 
 # ------------------------------------------------------------------------------------ #
 # ResNet options

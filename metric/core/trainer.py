@@ -27,6 +27,16 @@ from metric.core.config import cfg
 logger = logging.get_logger(__name__)
 
 
+class MetricModel(nn.Module):
+    def __init__(self):
+        self.backbone = builders.build_model()
+        self.head = builders.build_head()
+        
+    def forward(x):
+        features = self.backbone(x)
+        return self.head(features)
+
+
 def setup_env():
     """Sets up environment for training or testing."""
     if dist.is_master_proc():
@@ -49,7 +59,7 @@ def setup_env():
 def setup_model():
     """Sets up a model for training or testing and log the results."""
     # Build the model
-    model = builders.build_model()
+    model = MetricModel()
     logger.info("Model:\n{}".format(model))
     # Log model complexity
     logger.info(logging.dump_log_data(net.complexity(model), "complexity"))
@@ -65,7 +75,7 @@ def setup_model():
             module=model, device_ids=[cur_device], output_device=cur_device
         )
         # Set complexity function to be module's complexity function
-        model.complexity = model.module.complexity
+        #model.complexity = model.module.complexity
     return model
 
 
