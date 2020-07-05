@@ -1,62 +1,100 @@
-# pycls
+# pymetric
 
-**pycls** is an image classification codebase, written in [PyTorch](https://pytorch.org/). It was originally developed for the [On Network Design Spaces for Visual Recognition](https://arxiv.org/abs/1905.13214) project. **pycls** has since matured and been adopted by a number of [projects](#projects) at Facebook AI Research.
+**pymetric** tries to build a metric learning codebase based on [PyTorch](https://pytorch.org/). It refers from **pycls** [On Network Design Spaces for Visual Recognition](https://arxiv.org/abs/1905.13214) project and **fast-reid** from (https://github.com/JDAI-CV/fast-reid).
 
-<div align="center">
-  <img src="docs/regnetx_nets.png" width="550px" />
-  <p align="center"><b>pycls</b> provides a large set of baseline models across a wide range of flop regimes.</p>
-</div>
+# Introduction
 
-## Introduction
+- Includes **pycls** (https://github.com/facebookresearch/pycls), refer to [`pycls.md`](docs/pycls.md).
+- **pymetric** is written by `DistributedDataParallel` which is different from **fast-reid**. Now mainly includes features such as arcface loss and circle loss, ongoing.
 
-The goal of **pycls** is to provide a simple and flexible codebase for image classification. It is designed to support rapid implementation and evaluation of research ideas. **pycls** also provides a large collection of baseline results ([Model Zoo](MODEL_ZOO.md)).
+# Installation
 
-The codebase supports efficient single-machine multi-gpu training, powered by the PyTorch distributed package, and provides implementations of standard models including [ResNet](https://arxiv.org/abs/1512.03385), [ResNeXt](https://arxiv.org/abs/1611.05431), [EfficientNet](https://arxiv.org/abs/1905.11946), and [RegNet](https://arxiv.org/abs/2003.13678).
+**Requirements:**
 
-## Using pycls
+- NVIDIA GPU, Linux, Python3(tested on 3.6.10)
+- PyTorch, various Python packages; Instructions for installing these dependencies are found below
 
-Please see [`INSTALL.md`](docs/INSTALL.md) for brief installation instructions. After installation, please see [`GETTING_STARTED.md`](docs/GETTING_STARTED.md) for basic instructions and example commands on training and evaluation with **pycls**.
+**Notes:**
 
-## Model Zoo
+- **pymetric** does not currently support running on CPU; a GPU system is required
+- **pymetric** has been tested with CUDA 10.2 and cuDNN 7.1
 
-We provide a large set of baseline results and pretrained models available for download in the **pycls** [Model Zoo](MODEL_ZOO.md); including the simple, fast, and effective [RegNet](https://arxiv.org/abs/2003.13678) models that we hope can serve as solid baselines across a wide range of flop regimes.
+## PyTorch
 
-## Projects
+To install PyTorch with CUDA support, follow the [installation instructions](https://pytorch.org/get-started/locally/) from the [PyTorch website](https://pytorch.org).
 
-A number of projects at FAIR have been built on top of **pycls**:
+## pymetric
 
-- [On Network Design Spaces for Visual Recognition](https://arxiv.org/abs/1905.13214)
-- [Exploring Randomly Wired Neural Networks for Image Recognition](https://arxiv.org/abs/1904.01569)
-- [Designing Network Design Spaces](https://arxiv.org/abs/2003.13678)
-- [Are Labels Necessary for Neural Architecture Search?](https://arxiv.org/abs/2003.12056)
-- [PySlowFast Video Understanding Codebase](https://github.com/facebookresearch/SlowFast)
-
-If you are using **pycls** in your research and would like us to include your project here, please let us know or send a PR.
-
-## Citing pycls
-
-If you find **pycls** helpful in your research or refer to the baseline results in the [Model Zoo](MODEL_ZOO.md), please consider citing:
+Clone the **pymetric** repository:
 
 ```
-@InProceedings{Radosavovic2019,
-  title = {On Network Design Spaces for Visual Recognition},
-  author = {Radosavovic, Ilija and Johnson, Justin and Xie, Saining and Lo, Wan-Yen and Doll{\'a}r, Piotr},
-  booktitle = {ICCV},
-  year = {2019}
-}
-
-@InProceedings{Radosavovic2020,
-  title = {Designing Network Design Spaces},
-  author = {Radosavovic, Ilija and Kosaraju, Raj Prateek and Girshick, Ross and He, Kaiming and Doll{\'a}r, Piotr},
-  booktitle = {CVPR},
-  year = {2020}
-}
+# PYMETRIC=/path/to/clone/pycls
+git clone https://github.com/ym547559398/pymetric $PYMETRIC
 ```
 
-## License
+Install Python dependencies:
 
-**pycls** is released under the MIT license. Please see the [LICENSE](LICENSE) file for more information.
+```
+pip install -r $PYMETRIC/requirements.txt
+```
 
-## Contributing
+Set PYTHONPATH:
 
-We actively welcome your pull requests! Please see [`CONTRIBUTING.md`](docs/CONTRIBUTING.md) and [`CODE_OF_CONDUCT.md`](docs/CODE_OF_CONDUCT.md) for more info.
+```
+cd $PYMETRIC && export PYTHONPATH=`pwd`:PYTHONPATH
+```
+
+## Datasets
+
+Same with **pycls**, **pymetric** finds datasets via symlinks from `metric/datasets/data` to the actual locations where the dataset images and annotations are stored.
+
+Expected datasets structure for ImageNet:
+
+```
+imagenet
+|_ train
+|  |_ n01440764
+|  |_ ...
+|  |_ n15075141
+|_ val
+|  |_ n01440764
+|  |_ ...
+|  |_ n15075141
+|_ ...
+```
+
+Create a directory containing symlinks:
+
+```
+mkdir -p /path/pycls/pycls/datasets/data
+```
+
+Symlink ImageNet:
+
+```
+ln -s /path/imagenet /path/pycls/pycls/datasets/data/imagenet
+```
+
+Annotation format shows as /path/imagenet/val_list.txt
+
+# Getting Started
+
+Training a metric model:
+
+```
+python tools/train_metric.py \
+    --cfg configs/metric/R-50-1x64d_step_8gpu.yaml \
+    OUT_DIR ./output
+```
+
+Training a classfication model:
+
+```
+python tools/train_net.py \
+    --cfg configs/cls/R-50-1x64d_step_8gpu.yaml \
+    OUT_DIR ./output
+```
+
+# License
+
+**pymetric** is released under the MIT license. Please see the [LICENSE](LICENSE) file for more information.
