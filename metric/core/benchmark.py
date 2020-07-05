@@ -61,7 +61,7 @@ def compute_time_train(model, loss_fun):
             bw_timer.reset()
         # Forward
         fw_timer.tic()
-        preds = model(inputs)
+        _, preds, _ = model(inputs)
         loss = loss_fun(preds, labels)
         torch.cuda.synchronize()
         fw_timer.toc()

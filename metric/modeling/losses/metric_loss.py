@@ -125,10 +125,10 @@ class TripletLoss(object):
     Loss for Person Re-Identification'."""
 
     def __init__(self, cfg):
-        self._margin = cfg.MODEL.LOSSES.TRI.MARGIN
-        self._normalize_feature = cfg.MODEL.LOSSES.TRI.NORM_FEAT
-        self._scale = cfg.MODEL.LOSSES.TRI.SCALE
-        self._hard_mining = cfg.MODEL.LOSSES.TRI.HARD_MINING
+        self._margin = cfg.MODEL.LOSS_FUN.TRI.MARGIN
+        self._normalize_feature = cfg.MODEL.LOSS_FUN.TRI.NORM_FEAT
+        self._scale = cfg.MODEL.LOSS_FUN.TRI.SCALE
+        self._hard_mining = cfg.MODEL.LOSS_FUN.TRI.HARD_MINING
 
     def __call__(self, _, global_features, targets):
         if self._normalize_feature:
@@ -158,14 +158,15 @@ class TripletLoss(object):
         }
 
 
-class CircleLoss(object):
-    def __init__(self, cfg):
+class CircleLoss(torch.nn.Module):
+    def __init__(self):
+        super(CircleLoss, self).__init__()
         self._scale = cfg.MODEL.LOSSES.CIRCLE.SCALE
 
         self.m = cfg.MODEL.LOSSES.CIRCLE.MARGIN
         self.s = cfg.MODEL.LOSSES.CIRCLE.ALPHA
 
-    def __call__(self, _, global_features, targets):
+    def forward(self, global_features, targets):
         global_features = F.normalize(global_features, dim=1)
 
         sim_mat = torch.matmul(global_features, global_features.t())
@@ -188,7 +189,7 @@ class CircleLoss(object):
 
         loss = F.softplus(torch.logsumexp(logit_p, dim=1) + torch.logsumexp(logit_n, dim=1)).mean()
 
-        return {
-            "loss_circle": loss * self._scale,
-        }
-
+        #return nn.Sequential({
+            #"loss_circle": loss * self._scale,
+        #})
+        return loss * self._scale

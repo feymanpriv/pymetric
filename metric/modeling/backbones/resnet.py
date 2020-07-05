@@ -11,7 +11,6 @@ import metric.core.net as net
 import torch.nn as nn
 from metric.core.config import cfg
 
-
 # Stage depths for ImageNet models
 _IN_STAGE_DS = {50: (3, 4, 6, 3), 101: (3, 4, 23, 3), 152: (3, 8, 36, 3)}
 
@@ -38,6 +37,7 @@ class ResHead(nn.Module):
     def forward(self, x):
         x = self.avg_pool(x)
         x = x.view(x.size(0), -1)
+        #x = x[..., 0, 0]
         x = self.fc(x)
         return x
 

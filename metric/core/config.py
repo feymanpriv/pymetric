@@ -38,9 +38,9 @@ _C.MODEL.DEPTH = 0
 _C.MODEL.NUM_CLASSES = 10
 
 # Loss function (see pycls/models/loss.py for options)
-_C.MODEL.LOSS_FUN = "CircleLoss"
-
-
+_C.MODEL.LOSSES = CfgNode()
+_C.MODEL.LOSSES.NAME = "cross_entropy"
+#_C.MODEL.LOSSES.NAME = "CircleLoss"
 # Circle Loss options
 _C.MODEL.LOSSES.CIRCLE = CfgNode()
 _C.MODEL.LOSSES.CIRCLE.MARGIN = 0.25
@@ -401,8 +401,8 @@ def assert_and_infer_cfg(cache_urls=True):
     """Checks config values invariants."""
     err_str = "The first lr step must start at 0"
     assert not _C.OPTIM.STEPS or _C.OPTIM.STEPS[0] == 0, err_str
-    data_splits = ["train", "val", "test"]
-    err_str = "Data split '{}' not supported"
+    #data_splits = ["train", "val", "test"]
+    #err_str = "Data split '{}' not supported"
     #assert _C.TRAIN.SPLIT in data_splits, err_str.format(_C.TRAIN.SPLIT)
     #assert _C.TEST.SPLIT in data_splits, err_str.format(_C.TEST.SPLIT)
     err_str = "Mini-batch size should be a multiple of NUM_GPUS."

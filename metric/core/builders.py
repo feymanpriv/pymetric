@@ -13,12 +13,24 @@ from metric.modeling.backbones import ResNet
 from metric.modeling.losses import CircleLoss
 from metric.modeling.heads import  LinearHead 
 
-# Supported models
-#_models = {"anynet": AnyNet, "effnet": EffNet, "resnet": ResNet, "regnet": RegNet}
+# Supported backbones
 _models = {"resnet": ResNet}
 # Supported loss functions
-_loss_funs = {"CircleLoss": CircleLoss}
+_loss_funs = {"cross_entropy": torch.nn.CrossEntropyLoss}
+# Supported heads
 _heads = {"LinearHead": LinearHead}
+
+
+class MetricModel(torch.nn.Module):
+    def __init__(self):
+        super(MetricModel, self).__init__()
+        self.backbone = build_model()
+        self.head = build_head()
+        
+    def forward(self, x, targets):
+        features = self.backbone(x)
+        return self.head(features, targets=targets)
+
 
 def get_model():
     """Gets the model class specified in the config."""
@@ -36,10 +48,15 @@ def get_head():
 def get_loss_fun():
     """Gets the loss function class specified in the config."""
     err_str = "Loss function type '{}' not supported"
-    assert cfg.MODEL.LOSS_FUN in _loss_funs.keys(), err_str.format(cfg.TRAIN.LOSS)
-    return _loss_funs[cfg.MODEL.LOSS_FUN]
+    assert cfg.MODEL.LOSSES.NAME in _loss_funs.keys(), err_str.format(cfg.TRAIN.LOSS)
+    return _loss_funs[cfg.MODEL.LOSSES.NAME]
 
 
+def build_arch():
+    architecture = MetricModel()
+    return architecture
+
+    
 def build_model():
     """Builds the model."""
     return get_model()()
@@ -47,7 +64,7 @@ def build_model():
 
 def build_loss_fun():
     """Build the loss function."""
-    return get_loss_fun()(cfg)
+    return get_loss_fun()()
 
 
 def build_head():
@@ -68,3 +85,4 @@ def register_head(name, ctor):
 def register_loss_fun(name, ctor):
     """Registers a loss function dynamically."""
     _loss_funs[name] = ctor
+

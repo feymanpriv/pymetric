@@ -17,24 +17,14 @@ import metric.core.config as config
 import metric.core.distributed as dist
 import metric.core.logging as logging
 import metric.core.meters as meters
-import meters.core.net as net
+import metric.core.net as net
 import metric.core.optimizer as optim
 import metric.datasets.loader as loader
 import torch
 from metric.core.config import cfg
 
-
 logger = logging.get_logger(__name__)
 
-
-class MetricModel(nn.Module):
-    def __init__(self):
-        self.backbone = builders.build_model()
-        self.head = builders.build_head()
-        
-    def forward(x):
-        features = self.backbone(x)
-        return self.head(features)
 
 
 def setup_env():
@@ -59,10 +49,10 @@ def setup_env():
 def setup_model():
     """Sets up a model for training or testing and log the results."""
     # Build the model
-    model = MetricModel()
+    model = builders.build_arch()
     logger.info("Model:\n{}".format(model))
     # Log model complexity
-    logger.info(logging.dump_log_data(net.complexity(model), "complexity"))
+    #logger.info(logging.dump_log_data(net.complexity(model), "complexity"))
     # Transfer the model to the current GPU device
     err_str = "Cannot use more GPU devices than available"
     assert cfg.NUM_GPUS <= torch.cuda.device_count(), err_str
@@ -72,7 +62,7 @@ def setup_model():
     if cfg.NUM_GPUS > 1:
         # Make model replica operate on the current device
         model = torch.nn.parallel.DistributedDataParallel(
-            module=model, device_ids=[cur_device], output_device=cur_device
+            module=model, device_ids=[cur_device], output_device=cur_device, find_unused_parameters=True
         )
         # Set complexity function to be module's complexity function
         #model.complexity = model.module.complexity
@@ -93,16 +83,16 @@ def train_epoch(train_loader, model, loss_fun, optimizer, train_meter, cur_epoch
         # Transfer the data to the current GPU device
         inputs, labels = inputs.cuda(), labels.cuda(non_blocking=True)
         # Perform the forward pass
-        preds = model(inputs)
+        logits, preds, targets = model(inputs, labels)
         # Compute the loss
-        loss = loss_fun(preds, labels)
+        loss = loss_fun(logits, labels)
         # Perform the backward pass
         optimizer.zero_grad()
         loss.backward()
         # Update the parameters
         optimizer.step()
         # Compute the errors
-        top1_err, top5_err = meters.topk_errors(preds, labels, [1, 5])
+        top1_err, top5_err = meters.topk_errors(logits, labels, [1, 5])
         # Combine the stats across the GPUs (no reduction if 1 GPU used)
         loss, top1_err, top5_err = dist.scaled_all_reduce([loss, top1_err, top5_err])
         # Copy the stats from GPU to CPU (sync point)
@@ -128,9 +118,9 @@ def test_epoch(test_loader, model, test_meter, cur_epoch):
         # Transfer the data to the current GPU device
         inputs, labels = inputs.cuda(), labels.cuda(non_blocking=True)
         # Compute the predictions
-        preds = model(inputs)
+        logits, preds, targets = model(inputs, labels)
         # Compute the errors
-        top1_err, top5_err = meters.topk_errors(preds, labels, [1, 5])
+        top1_err, top5_err = meters.topk_errors(logits, labels, [1, 5])
         # Combine the errors across the GPUs  (no reduction if 1 GPU used)
         top1_err, top5_err = dist.scaled_all_reduce([top1_err, top5_err])
         # Copy the errors from GPU to CPU (sync point)
@@ -169,8 +159,8 @@ def train_model():
     train_meter = meters.TrainMeter(len(train_loader))
     test_meter = meters.TestMeter(len(test_loader))
     # Compute model and loader timings
-    if start_epoch == 0 and cfg.PREC_TIME.NUM_ITER > 0:
-        benchmark.compute_time_full(model, loss_fun, train_loader, test_loader)
+    #if start_epoch == 0 and cfg.PREC_TIME.NUM_ITER > 0:
+        #benchmark.compute_time_full(model, loss_fun, train_loader, test_loader)
     # Perform the training loop
     logger.info("Start epoch: {}".format(start_epoch + 1))
     for cur_epoch in range(start_epoch, cfg.OPTIM.MAX_EPOCH):
@@ -216,4 +206,4 @@ def time_model():
     train_loader = loader.construct_train_loader()
     test_loader = loader.construct_test_loader()
     # Compute model and loader timings
-    benchmark.compute_time_full(model, loss_fun, train_loader, test_loader)
+    #benchmark.compute_time_full(model, loss_fun, train_loader, test_loader)

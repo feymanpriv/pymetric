@@ -9,12 +9,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import Parameter
-from one_hot import one_hot
+from metric.modeling.layers.one_hot import one_hot
 
 from metric.core.config import cfg
 
 class Circle(nn.Module):
-    def __init__(self, cfg, in_feat, num_classes):
+    def __init__(self, in_feat, num_classes):
         super().__init__()
         self.in_feat = in_feat
         self._num_classes = num_classes
