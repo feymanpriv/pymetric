@@ -78,17 +78,14 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     # Load the checkpoint on CPU to avoid GPU mem spike
     checkpoint = torch.load(checkpoint_file, map_location="cpu")
     # Account for the DDP wrapper in the multi-gpu setting
+    exclude='head'
     ms = model.module if cfg.NUM_GPUS > 1 else model
-    ms.state_dict() = __load_pretrained_module__(ms.state_dict(), checkpoint["model_state"])
+    for name, m in checkpoint["model_state"].items():
+        if exclude not in name:
+            ms.state_dict()[name] = copy.deepcopy(m)
     #ms.load_state_dict(checkpoint["model_state"])
     # Load the optimizer state (commonly not done when fine-tuning)
     if optimizer:
         optimizer.load_state_dict(checkpoint["optimizer_state"])
     return checkpoint["epoch"]
 
-
-def __load_pretrained_module__(modules, module, exclude='head'):
-    for name, m in module.items():
-        if exclude not in name:
-            modules[name] = copy.deepcopy(m)
-    return modules
