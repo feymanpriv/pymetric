@@ -41,7 +41,7 @@ pip install -r $PYMETRIC/requirements.txt
 Set PYTHONPATH:
 
 ```
-cd $PYMETRIC && export PYTHONPATH=`pwd`:PYTHONPATH
+cd $PYMETRIC && export PYTHONPATH=`pwd`:$PYTHONPATH
 ```
 
 ## Datasets
