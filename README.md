@@ -28,7 +28,7 @@ To install PyTorch with CUDA support, follow the [installation instructions](htt
 Clone the **pymetric** repository:
 
 ```
-# PYMETRIC=/path/to/clone/pycls
+# PYMETRIC=/path/to/clone/pymetric
 git clone https://github.com/ym547559398/pymetric $PYMETRIC
 ```
 
