@@ -9,9 +9,9 @@
 
 import os
 
-import metric.core.distributed as dist
+import pycls.core.distributed as dist
 import torch
-from metric.core.config import cfg
+from pycls.core.config import cfg
 
 
 # Common prefix for checkpoint file names
@@ -78,8 +78,16 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     checkpoint = torch.load(checkpoint_file, map_location="cpu")
     # Account for the DDP wrapper in the multi-gpu setting
     ms = model.module if cfg.NUM_GPUS > 1 else model
-    ms.load_state_dict(checkpoint["model_state"])
+    ms.state_dict() = __load_pretrained_module__(ms.state_dict(), checkpoint["model_state"])
+    #ms.load_state_dict(checkpoint["model_state"])
     # Load the optimizer state (commonly not done when fine-tuning)
     if optimizer:
         optimizer.load_state_dict(checkpoint["optimizer_state"])
     return checkpoint["epoch"]
+
+
+def __load_pretrained_module__(modules, module, exclude='head'):
+    for name, m in module.items():
+        if exclude not in name:
+            modules[name] = copy.deepcopy(m)
+    return modules
