@@ -8,6 +8,7 @@
 """Functions that handle saving and loading of checkpoints."""
 
 import os
+import copy
 
 import pycls.core.distributed as dist
 import torch
