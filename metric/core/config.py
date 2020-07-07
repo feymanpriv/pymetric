@@ -286,7 +286,7 @@ _C.TRAIN.EVAL_PERIOD = 1
 _C.TRAIN.CHECKPOINT_PERIOD = 1
 
 # Resume training from the latest checkpoint in the output directory
-_C.TRAIN.AUTO_RESUME = True
+_C.TRAIN.AUTO_RESUME = False
 
 # Weights to start training from
 _C.TRAIN.WEIGHTS = ""

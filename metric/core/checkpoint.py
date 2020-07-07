@@ -10,9 +10,9 @@
 import os
 import copy
 
-import pycls.core.distributed as dist
+import metric.core.distributed as dist
 import torch
-from pycls.core.config import cfg
+from metric.core.config import cfg
 
 
 # Common prefix for checkpoint file names

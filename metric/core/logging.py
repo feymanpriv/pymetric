@@ -13,9 +13,9 @@ import logging
 import os
 import sys
 
-import pycls.core.distributed as dist
+import metric.core.distributed as dist
 import simplejson
-from pycls.core.config import cfg
+from metric.core.config import cfg
 
 
 # Show filename and line number in logs
