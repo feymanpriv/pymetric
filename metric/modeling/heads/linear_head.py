@@ -32,6 +32,10 @@ class LinearHead(nn.Module):
         
         self.in_feat = cfg.MODEL.HEADS.IN_FEAT
         self.num_classes = cfg.MODEL.HEADS.NUM_CLASSES
+
+        # embedding layer
+        self.embedding_size = cfg.MODEL.HEADS.REDUCTION_DIM
+        self.embedding_layer = nn.Linear(self.in_feat, self.embedding_size) 
         # identity classification layer
         cls_type = cfg.MODEL.HEADS.CLS_LAYER
         if cls_type == 'linear':    self.classifier = nn.Linear(self.in_feat, self.num_classes, bias=False)
@@ -45,7 +49,8 @@ class LinearHead(nn.Module):
 
     def forward(self, features, targets=None):
         global_feat = self.pool_layer(features)
-        global_feat = global_feat[..., 0, 0]
+        #global_feat = global_feat[..., 0, 0]
+        global_feat = self.embedding_layer(global_feat)
         #if not self.training: return global_feat
         # training
         try:              pred_class_logits = self.classifier(global_feat)
