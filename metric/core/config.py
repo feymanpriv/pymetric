@@ -261,7 +261,7 @@ _C.OPTIM.WEIGHT_DECAY = 5e-4
 _C.OPTIM.WARMUP_FACTOR = 0.1
 
 # Gradually warm up the OPTIM.BASE_LR over this number of epochs
-_C.OPTIM.WARMUP_EPOCHS = 0
+_C.OPTIM.WARMUP_EPOCHS = 5
 
 
 # ------------------------------------------------------------------------------------ #
@@ -363,7 +363,7 @@ _C.PREC_TIME.NUM_ITER = 30
 _C.NUM_GPUS = 1
 
 # Output directory
-_C.OUT_DIR = "/tmp"
+_C.OUT_DIR = "./output"
 
 # Config destination (in OUT_DIR)
 _C.CFG_DEST = "config.yaml"

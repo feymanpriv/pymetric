@@ -77,14 +77,26 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     assert os.path.exists(checkpoint_file), err_str.format(checkpoint_file)
     # Load the checkpoint on CPU to avoid GPU mem spike
     checkpoint = torch.load(checkpoint_file, map_location="cpu")
-    state_dict = checkpoint["model_state"]
+    try:
+        state_dict = checkpoint["model_state"]
+    except KeyError:
+        state_dict = checkpoint
     # Account for the DDP wrapper in the multi-gpu setting
     ms = model.module if cfg.NUM_GPUS > 1 else model
     model_dict = ms.state_dict()
+    '''
+    print("======================debug=====================")
+    print("pretrain", state_dict.keys())
+    print("running", model_dict.keys())
+    print("======================debug=====================")
+    '''
+    state_dict = {'backbone.'+k : v for k, v in state_dict.items()}
     pretrained_dict = {k: v for k, v in state_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
     if len(pretrained_dict) == len(state_dict):
         print('All params loaded')
     else:
+        print('construct model total {} keys and pretrin model total {} keys.'.format(len(model_dict), len(state_dict)))
+        print('{} pretrain keys load successfully.'.format(len(pretrained_dict)))
         not_loaded_keys = [k for k in state_dict.keys() if k not in pretrained_dict.keys()]
         print(('%s, ' * (len(not_loaded_keys) - 1) + '%s') % tuple(not_loaded_keys))
     model_dict.update(pretrained_dict)
@@ -93,5 +105,5 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     # Load the optimizer state (commonly not done when fine-tuning)
     if optimizer:
         optimizer.load_state_dict(checkpoint["optimizer_state"])
-    return checkpoint["epoch"]
-
+    #return checkpoint["epoch"]
+    return checkpoint

@@ -9,12 +9,11 @@
 
 import torch
 from metric.core.config import cfg
-from metric.modeling.backbones import ResNet
-from metric.modeling.losses import CircleLoss
+from metric.modeling.backbones import ResNet,resnest269
 from metric.modeling.heads import  LinearHead 
 
 # Supported backbones
-_models = {"resnet": ResNet}
+_models = {"resnet": ResNet, "resnest": resnest269}
 # Supported loss functions
 _loss_funs = {"cross_entropy": torch.nn.CrossEntropyLoss}
 # Supported heads
