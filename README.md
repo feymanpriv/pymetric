@@ -84,7 +84,9 @@ Training a metric model:
 ```
 python tools/train_metric.py \
     --cfg configs/metric/R-50-1x64d_step_8gpu.yaml \
-    OUT_DIR ./output
+    OUT_DIR ./output \
+    PORT 12001 \
+    TRAIN.WEIGHTS path/to/pretrainedmodel
 ```
 
 Training a classfication model:

@@ -52,10 +52,9 @@ class LinearHead(nn.Module):
         global_feat = self.pool_layer(features)
         global_feat = global_feat[..., 0, 0]
         global_feat = self.embedding_layer(global_feat)
-        if not self.training: return global_feat
-        else:
-            # training
-            try:              pred_class_logits = self.classifier(global_feat)
-            except TypeError: pred_class_logits = self.classifier(global_feat, targets)
-            return pred_class_logits, global_feat, targets
+        #if not self.training: return global_feat
+        # training
+        try:              pred_class_logits = self.classifier(global_feat)
+        except TypeError: pred_class_logits = self.classifier(global_feat, targets)
+        return pred_class_logits, global_feat, targets
 
