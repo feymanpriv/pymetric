@@ -6,16 +6,29 @@ import numpy as np
 import pickle
 
 import torch
-
 import metric.core.config as config
 import metric.datasets.transforms as transforms
 import metric.core.builders as builders
 from metric.core.config import cfg
+from utils.linear_head import LinearHead
+
 
 _MEAN = [0.406, 0.456, 0.485]
 _SD = [0.225, 0.224, 0.229]
 
+INFER_DIR = '../../data/eval/query'
 MODEL_WEIGHTS = 'saved_models/resnest_arc/model_epoch_0043.pyth'
+
+
+class MetricModel(torch.nn.Module):
+    def __init__(self):
+        super(MetricModel, self).__init__()
+        self.backbone = builders.build_model()
+        self.head = LinearHead()
+        
+    def forward(self, x):
+        features = self.backbone(x)
+        return self.head(features)
 
 
 def preprocess(im):
@@ -37,10 +50,9 @@ def extract(imgpath, model):
     input_data = torch.from_numpy(im_array)
     if torch.cuda.is_available(): 
         input_data = input_data.cuda() 
-    #input_data = input_data#.cuda() 
     fea = model(input_data, targets=None)
     embedding = to_numpy(fea)
-    print("fea_shape: ", embedding.shape)     
+    #print("fea_shape: ", embedding.shape)     
     return embedding
 
 
@@ -50,8 +62,6 @@ def main(spath):
     cfg.freeze()
     model = builders.build_arch()
     print(model)
-    #model.load_state_dict(torch.load(cfg.CONVERT_MODEL_FROM)['model_state'], strict=True)
-    #model.load_state_dict(torch.load(MODEL_WEIGHTS, map_location='cpu')['model_state'], strict=True)
     load_checkpoint(MODEL_WEIGHTS, model)
     if torch.cuda.is_available():
         model.cuda()
@@ -97,12 +107,7 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     # Account for the DDP wrapper in the multi-gpu setting
     ms = model
     model_dict = ms.state_dict()
-    '''
-    print("======================debug=====================")
-    print("pretrain", state_dict.keys())
-    print("running", model_dict.keys())
-    print("======================debug=====================")
-    '''
+    
     pretrained_dict = {k: v for k, v in state_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
     if len(pretrained_dict) == len(state_dict):
         print('All params loaded')
@@ -113,14 +118,11 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
         print(('%s, ' * (len(not_loaded_keys) - 1) + '%s') % tuple(not_loaded_keys))
     model_dict.update(pretrained_dict)
     ms.load_state_dict(model_dict)
-    #ms.load_state_dict(checkpoint["model_state"])
     # Load the optimizer state (commonly not done when fine-tuning)
     if optimizer:
         optimizer.load_state_dict(checkpoint["optimizer_state"])
-    #return checkpoint["epoch"]
     return checkpoint
 
 if __name__ == '__main__':
-    #main(sys.argv[1])
-    main('../../data/eval/query')
+    main(INFER_DIR)
 
