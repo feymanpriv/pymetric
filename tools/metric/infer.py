@@ -6,6 +6,7 @@ import numpy as np
 import pickle
 
 import torch
+
 import metric.core.config as config
 import metric.datasets.transforms as transforms
 import metric.core.builders as builders
@@ -17,9 +18,9 @@ _MEAN = [0.406, 0.456, 0.485]
 _SD = [0.225, 0.224, 0.229]
 
 INFER_DIR = '../../data/eval/query'
-MODEL_WEIGHTS = 'saved_models/resnest_arc/model_epoch_0043.pyth'
-
-
+MODEL_WEIGHTS = 'saved_models/resnest_arc/model_epoch_0100.pyth'
+OUTPUT_DIR = './eval_outputs/'
+COMBINE_DIR = os.path.join(OUTPUT_DIR,"combine_results/")
 class MetricModel(torch.nn.Module):
     def __init__(self):
         super(MetricModel, self).__init__()
@@ -29,6 +30,7 @@ class MetricModel(torch.nn.Module):
     def forward(self, x):
         features = self.backbone(x)
         return self.head(features)
+
 
 
 def preprocess(im):
@@ -57,9 +59,6 @@ def extract(imgpath, model):
 
 
 def main(spath):
-    config.load_cfg_fom_args("Extract feature.")
-    config.assert_and_infer_cfg()
-    cfg.freeze()
     model = builders.build_arch()
     print(model)
     load_checkpoint(MODEL_WEIGHTS, model)
@@ -74,13 +73,40 @@ def main(spath):
         if ext.lower() in ['.jpg', '.jpeg', '.bmp', '.png', '.pgm']:
             embedding = extract(imgfile, model)
             feadic[name] = embedding
-            print(feadic)
+            #print(feadic)
             if index%5000 == 0:
                 print(index, embedding.shape)
     
     with open(spath.split("/")[-1]+"fea.pickle", "wb") as fout:
         pickle.dump(feadic, fout, protocol=2)
+   
+def main_multicard(spath, cutno, total_num):
+    model = builders.build_arch()
+    print(model)
+    #model.load_state_dict(torch.load(cfg.CONVERT_MODEL_FROM)['model_state'], strict=True)
+    #model.load_state_dict(torch.load(MODEL_WEIGHTS, map_location='cpu')['model_state'], strict=True)
+    load_checkpoint(MODEL_WEIGHTS, model)
+    if torch.cuda.is_available():
+        model.cuda()
+    model.eval()
     
+    feadic = {}
+    for index, imgfile in enumerate(walkfile(spath)):
+        if index % total_num != cutno - 1:
+            continue
+        ext = os.path.splitext(imgfile)[-1]
+        name = os.path.basename(imgfile)
+        if ext.lower() in ['.jpg', '.jpeg', '.bmp', '.png', '.pgm']:
+            embedding = extract(imgfile, model)
+            feadic[name] = embedding
+            #print(feadic)
+            if index % 5000 == cutno - 1:
+                print(index, embedding.shape)
+    
+    with open(COMBINE_DIR+spath.split("/")[-1]+"fea.pickle"+'_%d'%cutno, "wb") as fout:
+        pickle.dump(feadic, fout, protocol=2)
+   
+
 
 def walkfile(spath):
     """get files in input spath """
@@ -107,7 +133,12 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     # Account for the DDP wrapper in the multi-gpu setting
     ms = model
     model_dict = ms.state_dict()
-    
+    '''
+    print("======================debug=====================")
+    print("pretrain", state_dict.keys())
+    print("running", model_dict.keys())
+    print("======================debug=====================")
+    '''
     pretrained_dict = {k: v for k, v in state_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
     if len(pretrained_dict) == len(state_dict):
         print('All params loaded')
@@ -118,11 +149,23 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
         print(('%s, ' * (len(not_loaded_keys) - 1) + '%s') % tuple(not_loaded_keys))
     model_dict.update(pretrained_dict)
     ms.load_state_dict(model_dict)
+    #ms.load_state_dict(checkpoint["model_state"])
     # Load the optimizer state (commonly not done when fine-tuning)
     if optimizer:
         optimizer.load_state_dict(checkpoint["optimizer_state"])
+    #return checkpoint["epoch"]
     return checkpoint
 
 if __name__ == '__main__':
-    main(INFER_DIR)
+    print(sys.argv)
+    config.load_cfg_fom_args("Extract feature.")
+    config.assert_and_infer_cfg()
+    cfg.freeze()
+    total_card = cfg.INFER.TOTAL_NUM
+    assert total_card > 0, 'cfg.TOTAL_NUM should larger than 0. ~'
+    assert cfg.INFER.CUT_NUM <= total_card, "cfg.CUT_NUM <= cfg.TOTAL_NUM. ~"
+    if total_card == 1:
+        main(INFER_DIR)
+    else:
+        main_multicard(INFER_DIR, cfg.INFER.CUT_NUM, cfg.INFER.TOTAL_NUM )
 
