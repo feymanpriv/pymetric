@@ -1,16 +1,16 @@
 MODEL:
   TYPE: resnet
   DEPTH: 50
-  NUM_CLASSES: 1000
+  NUM_CLASSES: 96264
   HEADS:
     NAME: "LinearHead"
-    NUM_CLASSES: 1000
+    NUM_CLASSES: 96264
     IN_FEAT: 2048
     REDUCTION_DIM: 512
     POOL_LAYER: "avgpool"
     CLS_LAYER: "arcface"
     MARGIN: 0.15
-    SCALE: 128
+    SCALE: 30
 RESNET:
   TRANS_FUN: bottleneck_transform
   NUM_GROUPS: 1
@@ -19,28 +19,30 @@ RESNET:
 BN:
   ZERO_INIT_FINAL_GAMMA: True
 OPTIM:
-  BASE_LR: 0.4
-  LR_POLICY: steps
+  BASE_LR: 0.1
+  LR_POLICY: cos
   STEPS: [0, 30, 60, 90]
   LR_MULT: 0.1
   MAX_EPOCH: 100
   MOMENTUM: 0.9
   NESTEROV: True
   WEIGHT_DECAY: 0.0001
+  WARMUP_EPOCHS: 5
 TRAIN:
-  DATASET: imagenet
-  SPLIT: train_small_list.txt
-  BATCH_SIZE: 1024 
+  DATASET: landmark
+  SPLIT: train_list.txt
+  BATCH_SIZE: 512
   IM_SIZE: 224
-  EVAL_PERIOD: 1
+  EVAL_PERIOD: 100
+  WEIGHTS: ./pretrained/
 TEST:
-  DATASET: imagenet
-  SPLIT: val_small_list.txt
-  BATCH_SIZE: 200
+  DATASET: landmark
+  SPLIT: val_list.txt
+  BATCH_SIZE: 64
   IM_SIZE: 256
 NUM_GPUS: 8
 DATA_LOADER:
-  NUM_WORKERS: 0 
+  NUM_WORKERS: 4 
 CUDNN:
   BENCHMARK: True
 OUT_DIR: .
