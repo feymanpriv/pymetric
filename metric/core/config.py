@@ -389,12 +389,18 @@ _C.PORT = 10001
 _C.DOWNLOAD_CACHE = "/tmp/pycls-download-cache"
 
 
+# add infer args for infer.pyo
+_C.INFER= CfgNode()
+_C.INFER.TOTAL_NUM = 4
+_C.INFER.CUT_NUM = 1
+
 # ------------------------------------------------------------------------------------ #
 # Deprecated keys
 # ------------------------------------------------------------------------------------ #
 
 _C.register_deprecated_key("PREC_TIME.BATCH_SIZE")
 _C.register_deprecated_key("PREC_TIME.ENABLED")
+
 
 
 def assert_and_infer_cfg(cache_urls=True):
