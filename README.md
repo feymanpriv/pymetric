@@ -1,11 +1,12 @@
 # pymetric
 
-**pymetric** tries to build a metric learning codebase based on [PyTorch](https://pytorch.org/). It refers from **pycls** [On Network Design Spaces for Visual Recognition](https://arxiv.org/abs/1905.13214) project and **fast-reid** from (https://github.com/JDAI-CV/fast-reid).
+**pymetric** tries to build a metric learning and retrieval codebase based on [PyTorch](https://pytorch.org/). It refers from **pycls** [On Network Design Spaces for Visual Recognition](https://arxiv.org/abs/1905.13214) project and **fast-reid** from (https://github.com/JDAI-CV/fast-reid).
 
 # Introduction
 
 - Includes **pycls** (https://github.com/facebookresearch/pycls), refer to [`pycls.md`](docs/pycls.md).
 - **pymetric** is written by `DistributedDataParallel` which is different from **fast-reid**. Now mainly includes features such as arcface loss and circle loss, ongoing.
+- Add multicards feature extraction, searching topk and computing mAP
 
 # Installation
 
@@ -46,36 +47,8 @@ cd $PYMETRIC && export PYTHONPATH=`pwd`:$PYTHONPATH
 
 ## Datasets
 
-Same with **pycls**, **pymetric** finds datasets via symlinks from `metric/datasets/data` to the actual locations where the dataset images and annotations are stored.
+Same with **pycls**, **pymetric** finds datasets via symlinks from `metric/datasets/data` to the actual locations where the dataset images and annotations are stored. Refer to [`DATA.md`](docs/DATA.md).
 
-Expected datasets structure for ImageNet:
-
-```
-imagenet
-|_ train
-|  |_ n01440764
-|  |_ ...
-|  |_ n15075141
-|_ val
-|  |_ n01440764
-|  |_ ...
-|  |_ n15075141
-|_ ...
-```
-
-Create a directory containing symlinks:
-
-```
-mkdir -p /path/pycls/pycls/datasets/data
-```
-
-Symlink ImageNet:
-
-```
-ln -s /path/imagenet /path/pycls/pycls/datasets/data/imagenet
-```
-
-Annotation format shows as /path/imagenet/val_list.txt
 
 # Getting Started
 
@@ -89,12 +62,11 @@ python tools/train_metric.py \
     TRAIN.WEIGHTS path/to/pretrainedmodel
 ```
 
-Training a classfication model:
-
+Extracting features and evaluation
 ```
-python tools/train_net.py \
-    --cfg configs/cls/R-50-1x64d_step_8gpu.yaml \
-    OUT_DIR ./output
+set ${total_num} = n*(gou_cards)
+sh tools/metric/eval/infer.sh
+python search.py search_gpu ${queryfea_path}, ${referfea_path}, ${output}
 ```
 
 # License
