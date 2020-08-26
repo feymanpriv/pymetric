@@ -81,6 +81,7 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     # Account for the DDP wrapper in the multi-gpu setting
     ms = model.module if cfg.NUM_GPUS > 1 else model
     model_dict = ms.state_dict()
+    #state_dict = {'backbone.'+k : v for k, v in state_dict.items()}
     pretrained_dict = {k: v for k, v in state_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
     if len(pretrained_dict) == len(state_dict):
         print('All params loaded')
