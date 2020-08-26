@@ -11,7 +11,8 @@ import metric.core.config as config
 import metric.datasets.transforms as transforms
 import metric.core.builders as builders
 from metric.core.config import cfg
-from utils.linear_head import LinearHead
+from linear_head import LinearHead
+from util import walkfile
 
 
 _MEAN = [0.406, 0.456, 0.485]
@@ -21,6 +22,8 @@ INFER_DIR = '../../data/eval/query'
 MODEL_WEIGHTS = 'saved_models/resnest_arc/model_epoch_0100.pyth'
 OUTPUT_DIR = './eval_outputs/'
 COMBINE_DIR = os.path.join(OUTPUT_DIR,"combine_results/")
+
+
 class MetricModel(torch.nn.Module):
     def __init__(self):
         super(MetricModel, self).__init__()
@@ -30,7 +33,6 @@ class MetricModel(torch.nn.Module):
     def forward(self, x):
         features = self.backbone(x)
         return self.head(features)
-
 
 
 def preprocess(im):
@@ -83,8 +85,6 @@ def main(spath):
 def main_multicard(spath, cutno, total_num):
     model = builders.build_arch()
     print(model)
-    #model.load_state_dict(torch.load(cfg.CONVERT_MODEL_FROM)['model_state'], strict=True)
-    #model.load_state_dict(torch.load(MODEL_WEIGHTS, map_location='cpu')['model_state'], strict=True)
     load_checkpoint(MODEL_WEIGHTS, model)
     if torch.cuda.is_available():
         model.cuda()
@@ -105,19 +105,6 @@ def main_multicard(spath, cutno, total_num):
     
     with open(COMBINE_DIR+spath.split("/")[-1]+"fea.pickle"+'_%d'%cutno, "wb") as fout:
         pickle.dump(feadic, fout, protocol=2)
-   
-
-
-def walkfile(spath):
-    """get files in input spath """
-    files = os.listdir(spath)
-    for file in files:
-        tmppath = os.path.join(spath, file)
-        if not os.path.isdir(tmppath):
-            yield tmppath
-        else:
-            for lowfile in walkfile(tmppath):
-                yield lowfile
 
 
 def load_checkpoint(checkpoint_file, model, optimizer=None):
@@ -133,12 +120,7 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     # Account for the DDP wrapper in the multi-gpu setting
     ms = model
     model_dict = ms.state_dict()
-    '''
-    print("======================debug=====================")
-    print("pretrain", state_dict.keys())
-    print("running", model_dict.keys())
-    print("======================debug=====================")
-    '''
+
     pretrained_dict = {k: v for k, v in state_dict.items() if k in model_dict and model_dict[k].size() == v.size()}
     if len(pretrained_dict) == len(state_dict):
         print('All params loaded')
@@ -155,6 +137,8 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
         optimizer.load_state_dict(checkpoint["optimizer_state"])
     #return checkpoint["epoch"]
     return checkpoint
+
+
 
 if __name__ == '__main__':
     print(sys.argv)

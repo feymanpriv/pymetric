@@ -1,8 +1,8 @@
 # encoding: utf-8
 """
-    based on 
-    https://github.com/JDAI-CV/fast-reid/blob/master/fastreid/modeling/heads/linear_head.py
+    for feature extraction
 """
+
 import torch
 from torch import nn
 
