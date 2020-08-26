@@ -1,42 +1,46 @@
 MODEL:
-  TYPE: resnest
-  DEPTH: 269
+  TYPE: resnet152x1
+  DEPTH: 152
   NUM_CLASSES: 96264
   HEADS:
     NAME: "LinearHead"
     NUM_CLASSES: 96264
     IN_FEAT: 2048
     REDUCTION_DIM: 512
-    POOL_LAYER: "gempool"
+    POOL_LAYER: "avgpool"
     CLS_LAYER: "arcface"
     MARGIN: 0.15
     SCALE: 30
+RESNET:
+  TRANS_FUN: bottleneck_transform
+  NUM_GROUPS: 1
+  WIDTH_PER_GROUP: 64
+  STRIDE_1X1: False
 BN:
   ZERO_INIT_FINAL_GAMMA: True
 OPTIM:
-  BASE_LR: 0.1
-  LR_POLICY: cos
-  STEPS: [0, 30, 60, 90]
+  BASE_LR: 0.01
+  LR_POLICY: steps
+  STEPS: [0, 60, 60, 60]
   LR_MULT: 0.1
   MAX_EPOCH: 100
   MOMENTUM: 0.9
   NESTEROV: True
   WEIGHT_DECAY: 0.0001
-  WARMUP_EPOCHS: 0
 TRAIN:
-  DATASET: landmark
+  DATASET: GLDv2
   SPLIT: train_list.txt
-  BATCH_SIZE: 512
+  BATCH_SIZE: 128
   IM_SIZE: 224
   EVAL_PERIOD: 100
 TEST:
-  DATASET: landmark
+  DATASET: GLDv2
   SPLIT: val_list.txt
-  BATCH_SIZE: 64
+  BATCH_SIZE: 16
   IM_SIZE: 256
 NUM_GPUS: 8
 DATA_LOADER:
   NUM_WORKERS: 4
 CUDNN:
   BENCHMARK: True
-OUT_DIR: ./output
+OUT_DIR: .
