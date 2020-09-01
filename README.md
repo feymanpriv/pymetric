@@ -30,7 +30,7 @@ Clone the **pymetric** repository:
 
 ```
 # PYMETRIC=/path/to/clone/pymetric
-git clone https://github.com/ym547559398/pymetric $PYMETRIC
+git clone https://github.com/feymanpriv/pymetric $PYMETRIC
 ```
 
 Install Python dependencies:
@@ -64,7 +64,7 @@ python tools/train_metric.py \
 
 Extracting features and evaluation
 ```
-set ${total_num} = n*(gou_cards)
+set ${total_num} = n*(gpu_cards)
 sh tools/metric/eval/infer.sh
 python search.py search_gpu ${queryfea_path}, ${referfea_path}, ${output}
 ```
