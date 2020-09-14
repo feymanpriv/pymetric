@@ -5,6 +5,8 @@ import numpy as np
 import faiss
 import pickle
 
+import gc
+from scipy import spatial
 
 
 def clac_mAP(resultfile, gtfile, topk = 100):
@@ -52,6 +54,38 @@ def clac_mAP(resultfile, gtfile, topk = 100):
     mAP = mAP / cnt_r
     print("mAP:", "%.2f%%"%(mAP * 100))
 
+
+
+def search(query_path, refer_path, output, topk=100):
+    """ Search on CPU """
+
+    queryfeas, queryconts = loadFeaFromPickle(query_path)
+    referfeas, referconts = loadFeaFromPickle(refer_path)
+    assert(queryfeas.shape[1] == referfeas.shape[1])
+    print("=> query feature shape: {}".format(queryfeas.shape), file=sys.stderr)
+    print("=> refer feature shape: {}".format(referfeas.shape), file=sys.stderr)
+    
+    start = time.time()
+    outdic = {}
+    for test_index in range(queryfeas.shape[0]):
+        distances = spatial.distance.cdist(
+            queryfeas[np.newaxis, test_index, :], referfeas, 'cosine')[0]
+        partition = np.argpartition(distances, topk)[:topk]
+        nearest = sorted([(referconts[p], distances[p]) for p in partition],
+                         key=lambda x: x[1])
+        searchresult = [(refercont, 1. - cosine_distance) 
+                                    for refercont, cosine_distance in nearest
+        ]
+        outdic[queryconts[test_index]] = searchresult
+
+    end = time.time()
+    print("=> searching total use time {}".format(end - start), file=sys.stderr)
+
+    del queryfeas
+    del referfeas
+    gc.collect()
+
+    pickle.dump(outdic, open(output,"wb"), protocol=2)
 
 
 def search_gpu(query_path, refer_path, output, topk=100):

@@ -62,6 +62,11 @@ def l2_norm(fea):
     return fea
 
 
+def norm(x):
+    n = np.sqrt(np.sum(x ** 2,1)).reshape(-1,1)
+    return x / (n + 0.000001)
+
+
 def walkfile(spath):
     """get files in input spath """
     files = os.listdir(spath)
