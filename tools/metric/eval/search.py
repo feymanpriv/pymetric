@@ -94,7 +94,19 @@ def loadFeaFromPickle(feafile):
     feas = np.array(feas)
     return feas, names
 
-
+def saveTop10Csv(searchpickle, output):
+    resultdic = pickle.loads(open(searchpickle, "rb").read())
+    resultdic = sorted(resultdic.items(), key=lambda x:x[0])
+    #print(resultdic[:3])
+    fout = open(output, 'wb')
+    formats = '{0[0]},{{%s}}' % (','.join(['{0[%s]}' % str(i+1) for i in range(10)]))
+    print(formats)
+    for item in resultdic:
+        qrcnt, rf_res =  item
+        olist = [qrcnt] + [it[0] for it in rf_res[:10]]
+        out = formats.format(olist) + '\n'
+        fout.write(out.encode('utf-8'))
+        
 
 if __name__ == "__main__":
     if len(sys.argv)>1 :

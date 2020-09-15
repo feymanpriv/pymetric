@@ -3,6 +3,7 @@
 import sys, os
 import struct
 import numpy as np
+import pickle
 
 
 def readkv(f):
@@ -87,7 +88,92 @@ def conmbineFeaPickle(COMBINE_DIR, OUTFILE):
     with open(OUTFILE,'wb') as fout:
         pickle.dump(all_dict, fout, protocol=2)    
    
+def visualize(onebookpath):
+    fullpath = os.path.abspath(onebookpath)
+    searchfile = os.path.join(onebookpath, "searchresults.pickle")
+    outhtml = os.path.join(onebookpath, "searchresults.html")
+    with open(searchfile, "rb") as f:
+        resdic = pickle.load(f)
+    platform = '/home/yangmin09'
+    suffix = 'http://10.88.149.44:8903'
+    #bookpath = fullpath.replace(platform, suffix)
+    bookpath = 'http://yq01-sys-hic-k8s-v100-box-a225-0492.yq01.baidu.com:8902/weikai/data/huawei/test_data_A/'
+    print(bookpath)
 
+    queryurl = ""
+    referurl = ""
+
+    html_file = open(outhtml, "w")
+    html_file.write('<html><meta charset=\"utf-8\"><body>\n')
+    html_file.write('<p>\n')
+    html_file.write('<table border="1">\n')
+
+    for i, (k,v) in enumerate(sorted(resdic.items())):
+        html_file.write('<td><img src="%s" width="150" height="150" /></td>' % (bookpath + "query/" + k))
+        html_file.write("<td> %s %s</td>\n" % (i, k))
+
+        recall = v[:10] # top10
+        #dis = v['distance']
+
+        if len(recall) == 0:
+            html_file.write('</tr>\n')
+            continue
+        for i in range(len(recall)):
+            referhtml = bookpath + 'gallery/' + recall[i][0]
+            html_file.write('<td><img src="%s" width="150" height="150" /><br/><color="green">score: %s<br/> </td>' % (referhtml, str(recall[i][1])))
+
+        html_file.write('</tr>\n')
+
+    html_file.write("</table>\n</p>\n</body>\n</html>")
+    print(onebookpath, "draw html finished ")
+
+def recall_topk(fea, lab, k = 1): 
+    print(fea.shape)
+    print(lab.shape)
+    fea = np.array(fea)
+    fea = fea.reshape(fea.shape[0], -1) 
+    n = np.sqrt(np.sum(fea**2, 1)).reshape(-1, 1)
+    fea = fea/n
+    a = np.sum(fea ** 2, 1).reshape(-1, 1)
+    b = a.T 
+    ab = np.dot(fea, fea.T)
+    d = a + b - 2*ab
+    d = d + np.eye(len(fea)) * 1e8 
+    sorted_index = np.argsort(d, 1)
+    res = 0 
+    for i in range(len(fea)):
+        pred = lab[sorted_index[i][0]]
+        if lab[i] == pred:
+            res += 1.0 
+    res = res/len(fea)
+    return res 
+
+
+def eval(searchfile, gtfile):
+    resdic = dict()
+    with open(searchfile, "rb") as f:
+        resdic = pickle.load(f)
+    gtdict = dict()
+    with open(gtfile, "r") as f:
+        for line in f:
+            line = line.strip().split()
+            filename = os.path.basename(line[0])
+            #print(filename)
+            label = int(line[1])
+            gtdict[filename] = label
+    file_list = resdic.keys()
+    ff = []
+    ll = []
+    for filename in file_list:
+        f = resdic[filename]
+        l = gtdict[filename]
+        ff.append(f)
+        ll.append(l)
+
+    ff = np.vstack(ff)
+    ll = np.vstack(ll)
+    recall = recall_topk(ff, ll, k=1)
+    print("recall ~", recall)
 
 if __name__ == "__main__":
     if len(sys.argv)>1 :
