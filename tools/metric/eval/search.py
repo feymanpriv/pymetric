@@ -128,6 +128,7 @@ def loadFeaFromPickle(feafile):
     feas = np.array(feas)
     return feas, names
 
+
 def saveTop10Csv(searchpickle, output):
     resultdic = pickle.loads(open(searchpickle, "rb").read())
     resultdic = sorted(resultdic.items(), key=lambda x:x[0])
@@ -141,6 +142,7 @@ def saveTop10Csv(searchpickle, output):
         out = formats.format(olist) + '\n'
         fout.write(out.encode('utf-8'))
         
+
 
 if __name__ == "__main__":
     if len(sys.argv)>1 :

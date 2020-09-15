@@ -93,20 +93,14 @@ def conmbineFeaPickle(COMBINE_DIR, OUTFILE):
     with open(OUTFILE,'wb') as fout:
         pickle.dump(all_dict, fout, protocol=2)    
    
-def visualize(onebookpath):
-    fullpath = os.path.abspath(onebookpath)
-    searchfile = os.path.join(onebookpath, "searchresults.pickle")
-    outhtml = os.path.join(onebookpath, "searchresults.html")
+
+def visualize(path):
+    searchfile = os.path.join(path, "searchresults.pickle")
+    outhtml = os.path.join(path, "searchresults.html")
     with open(searchfile, "rb") as f:
         resdic = pickle.load(f)
-    platform = '/home/yangmin09'
-    suffix = 'http://10.88.149.44:8903'
-    #bookpath = fullpath.replace(platform, suffix)
-    bookpath = 'http://yq01-sys-hic-k8s-v100-box-a225-0492.yq01.baidu.com:8902/weikai/data/huawei/test_data_A/'
-    print(bookpath)
-
-    queryurl = ""
-    referurl = ""
+    serverpath = 'http://127.0.0.0:8901/'
+    print(serverpath)
 
     html_file = open(outhtml, "w")
     html_file.write('<html><meta charset=\"utf-8\"><body>\n')
@@ -114,27 +108,26 @@ def visualize(onebookpath):
     html_file.write('<table border="1">\n')
 
     for i, (k,v) in enumerate(sorted(resdic.items())):
-        html_file.write('<td><img src="%s" width="150" height="150" /></td>' % (bookpath + "query/" + k))
+        html_file.write('<td><img src="%s" width="150" height="150" /></td>' % \
+                                (serverpath + "query/" + k))
         html_file.write("<td> %s %s</td>\n" % (i, k))
 
         recall = v[:10] # top10
-        #dis = v['distance']
-
         if len(recall) == 0:
             html_file.write('</tr>\n')
             continue
         for i in range(len(recall)):
-            referhtml = bookpath + 'gallery/' + recall[i][0]
-            html_file.write('<td><img src="%s" width="150" height="150" /><br/><color="green">score: %s<br/> </td>' % (referhtml, str(recall[i][1])))
-
+            referhtml = serverpath + 'gallery/' + recall[i][0]
+            html_file.write('<td><img src="%s" width="150" height="150" \
+                /><br/><color="green">score: %s<br/> </td>' % (referhtml, str(recall[i][1])))
         html_file.write('</tr>\n')
 
     html_file.write("</table>\n</p>\n</body>\n</html>")
-    print(onebookpath, "draw html finished ")
+    print(path, "draw html finished ")
+
 
 def recall_topk(fea, lab, k = 1): 
-    print(fea.shape)
-    print(lab.shape)
+    print(fea.shape, lab.shape)
     fea = np.array(fea)
     fea = fea.reshape(fea.shape[0], -1) 
     n = np.sqrt(np.sum(fea**2, 1)).reshape(-1, 1)
@@ -179,6 +172,8 @@ def eval(searchfile, gtfile):
     ll = np.vstack(ll)
     recall = recall_topk(ff, ll, k=1)
     print("recall ~", recall)
+
+
 
 if __name__ == "__main__":
     if len(sys.argv)>1 :
