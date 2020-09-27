@@ -11,7 +11,7 @@ import metric.core.config as config
 import metric.datasets.transforms as transforms
 import metric.core.builders as builders
 from metric.core.config import cfg
-from linear_head import LinearHead
+from linear_head import LinearHead_cat_with_pred
 from util import walkfile
 
 
@@ -28,7 +28,7 @@ class MetricModel(torch.nn.Module):
     def __init__(self):
         super(MetricModel, self).__init__()
         self.backbone = builders.build_model()
-        self.head = LinearHead()
+        self.head = LinearHead_cat_with_pred()
         
     def forward(self, x):
         features = self.backbone(x)
@@ -54,14 +54,13 @@ def extract(imgpath, model):
     input_data = torch.from_numpy(im_array)
     if torch.cuda.is_available(): 
         input_data = input_data.cuda() 
-    fea = model(input_data, targets=None)
-    embedding = to_numpy(fea)
-    #print("fea_shape: ", embedding.shape)     
-    return embedding
+    scores = model(input_data, targets=None)
+    scores = to_numpy(scores)
+    max_ind = np.argmax(scores, axis=1)
+    return max_ind
 
 
 def main(spath):
-    #model = builders.build_arch()
     model = builders.MetricModel()
     print(model)
     load_checkpoint(MODEL_WEIGHTS, model)
@@ -69,22 +68,20 @@ def main(spath):
         model.cuda()
     model.eval()
     
-    feadic = {}
+    result = {}
     for index, imgfile in enumerate(walkfile(spath)):
         ext = os.path.splitext(imgfile)[-1]
         name = os.path.basename(imgfile)
         if ext.lower() in ['.jpg', '.jpeg', '.bmp', '.png', '.pgm']:
-            embedding = extract(imgfile, model)
-            feadic[name] = embedding
-            #print(feadic)
+            label = extract(imgfile, model)
+            result[name] = label
             if index%5000 == 0:
-                print(index, embedding.shape)
+                print(index, name, label)
     
-    with open(spath.split("/")[-1]+"fea.pickle", "wb") as fout:
-        pickle.dump(feadic, fout, protocol=2)
+    with open(spath.split("/")[-1]+"label.pickle", "wb") as fout:
+        pickle.dump(result, fout, protocol=2)
    
 def main_multicard(spath, cutno, total_num):
-    #model = builders.build_arch()
     model = builders.MetricModel()
     print(model)
     load_checkpoint(MODEL_WEIGHTS, model)
@@ -92,21 +89,20 @@ def main_multicard(spath, cutno, total_num):
         model.cuda()
     model.eval()
     
-    feadic = {}
+    result = {}
     for index, imgfile in enumerate(walkfile(spath)):
         if index % total_num != cutno - 1:
             continue
         ext = os.path.splitext(imgfile)[-1]
         name = os.path.basename(imgfile)
         if ext.lower() in ['.jpg', '.jpeg', '.bmp', '.png', '.pgm']:
-            embedding = extract(imgfile, model)
-            feadic[name] = embedding
-            #print(feadic)
+            label = extract(imgfile, model)
+            result[name] = label
             if index % 5000 == cutno - 1:
-                print(index, embedding.shape)
+                print(index, name, label)
     
-    with open(COMBINE_DIR+spath.split("/")[-1]+"fea.pickle"+'_%d'%cutno, "wb") as fout:
-        pickle.dump(feadic, fout, protocol=2)
+    with open(COMBINE_DIR+spath.split("/")[-1]+"label.pickle"+'_%d'%cutno, "wb") as fout:
+        pickle.dump(result, fout, protocol=2)
 
 
 def load_checkpoint(checkpoint_file, model, optimizer=None):

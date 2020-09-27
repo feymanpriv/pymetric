@@ -63,11 +63,14 @@ python tools/train_metric.py \
     TRAIN.WEIGHTS path/to/pretrainedmodel
 ```
 
-Extracting features and evaluation
+Extracting features(labels) and evaluation
 ```
 set ${total_num} = n*(gpu_cards)
 sh tools/metric/eval/infer.sh
 python search.py search_gpu ${queryfea_path}, ${referfea_path}, ${output}
+
+Convert to tensorflow2.3 (please refer onnx and onnx-tensorflow)
+examples: tools/convert/torch2onnx.py tools/convert/onnx2tf.py
 ```
 
 # License
