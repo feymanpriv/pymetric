@@ -75,13 +75,13 @@ examples: tools/convert/torch2onnx.py tools/convert/onnx2tf.py
 
 # Results
 
-**Google Landmark Retrieval Challenge 2020**
+**2nd place on Google Landmark Retrieval Challenge 2020**
 
 |  Backbone    |  Scale  | Margin |   Size  | Public Score | Private Score |
 |--------------|:-------:|:------:|:-------:|:------------:|:-------------:|
-|  ResNeSt269  |    30   | 0.15   | 224/224 |   0.35129    |    0.30819    |
-|              |         |        | 448/448 |   0.36972    |    0.33015    |
-|              |         |        | 640/448 |   0.39040    |    0.34718    |
+|  ResNeSt269  |    30   |  0.15  | 224/224 |   0.35129    |    0.30819    |
+|  ResNeSt269  |    30   |  0.15  | 448/448 |   0.36972    |    0.33015    |
+|  ResNeSt269  |    30   |  0.15  | 640/448 |   0.39040    |    0.34718    |
 
 
 # License
