@@ -4,7 +4,7 @@
 
 # Introduction
 
-- 2nd place in Google Landmark Retrieval 2020 Competition
+- **2nd** place in Google Landmark Retrieval 2020 Competition
 - Includes **pycls** (https://github.com/facebookresearch/pycls), refer to [`pycls.md`](docs/pycls.md).
 - **pymetric** is written by `DistributedDataParallel` which is different from **fast-reid**. Now mainly includes features such as arcface loss and circle loss, ongoing.
 - Add multicards feature extraction, searching topk and computing mAP
@@ -72,6 +72,17 @@ python search.py search_gpu ${queryfea_path}, ${referfea_path}, ${output}
 Convert to tensorflow2.3 (please refer onnx and onnx-tensorflow)
 examples: tools/convert/torch2onnx.py tools/convert/onnx2tf.py
 ```
+
+# Results
+
+**Google Landmark Retrieval Challenge 2020**
+
+|  Backbone    |  Scale  | Margin |   Size  | Public Score | Private Score |
+|--------------|:-------:|:------:|:-------:|:------------:|:-------------:|
+|  ResNeSt269  |    30   | 0.15   | 224/224 |   0.35129    |    0.30819    |
+|              |         |        | 448/448 |   0.36972    |    0.33015    |
+|              |         |        | 640/448 |   0.39040    |    0.34718    |
+
 
 # License
 
