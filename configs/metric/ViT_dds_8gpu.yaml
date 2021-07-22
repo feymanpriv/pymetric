@@ -1,0 +1,51 @@
+MODEL:
+  TYPE: vit
+  NUM_CLASSES: 81313
+  WIDTH: 768
+  LAYERS: 12
+  EMB_DIM: 512
+  PATCH_SIZE: 32 
+  HEADS:
+    NAME: "LinearHead"
+    NUM_CLASSES: 96264
+    IN_FEAT: 2048
+    REDUCTION_DIM: 512
+    POOL_LAYER: "identity"
+    CLS_LAYER: "arcface"
+    MARGIN: 0.15
+    SCALE: 30
+RESNET:
+  TRANS_FUN: bottleneck_transform
+  NUM_GROUPS: 1
+  WIDTH_PER_GROUP: 64
+  STRIDE_1X1: False
+BN:
+  ZERO_INIT_FINAL_GAMMA: True
+OPTIM:
+  BASE_LR: 0.1
+  LR_POLICY: cos
+  STEPS: [0, 30, 60, 90]
+  LR_MULT: 0.1
+  MAX_EPOCH: 100
+  MOMENTUM: 0.9
+  NESTEROV: True
+  WEIGHT_DECAY: 0.0001
+  WARMUP_EPOCHS: 5
+TRAIN:
+  DATASET: landmark
+  SPLIT: train_list.txt
+  BATCH_SIZE: 512
+  IM_SIZE: 224
+  EVAL_PERIOD: 100
+  WEIGHTS: ./pretrained/
+TEST:
+  DATASET: landmark
+  SPLIT: val_list.txt
+  BATCH_SIZE: 64
+  IM_SIZE: 256
+NUM_GPUS: 8
+DATA_LOADER:
+  NUM_WORKERS: 4 
+CUDNN:
+  BENCHMARK: True
+OUT_DIR: .

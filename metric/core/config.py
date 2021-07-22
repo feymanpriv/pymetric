@@ -34,6 +34,13 @@ _C.MODEL.TYPE = ""
 # Number of weight layers
 _C.MODEL.DEPTH = 0
 
+# Transformer
+_C.MODEL.WIDTH = 768
+_C.MODEL.LAYERS = 12
+-C.MODEL.PATCH_SIZE = 32
+-C.MODEL.EMB_DIM = 512
+
+
 # Number of classes
 _C.MODEL.NUM_CLASSES = 10
 
