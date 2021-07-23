@@ -7,9 +7,9 @@ MODEL:
   PATCH_SIZE: 32 
   HEADS:
     NAME: "LinearHead"
-    NUM_CLASSES: 96264
-    IN_FEAT: 2048
-    REDUCTION_DIM: 512
+    NUM_CLASSES: 81313
+    IN_FEAT: 512
+    REDUCTION_DIM: 256
     POOL_LAYER: "identity"
     CLS_LAYER: "arcface"
     MARGIN: 0.15

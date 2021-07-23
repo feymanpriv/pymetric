@@ -5,7 +5,10 @@
 
 """ Vision Transformer models """
 
+from collections import OrderedDict
 import metric.core.net as net
+from metric.core.config import cfg
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,7 +17,7 @@ import torch.nn.functional as F
 class ResidualAttentionBlock(nn.Module):
     """ Vision Transformer Block """
 
-    def __init__(self, dmodel, n_head, attn_mask):
+    def __init__(self, d_model, n_head, attn_mask):
         super().__init__()
         self.attn = nn.MultiheadAttention(d_model, n_head)
         self.ln_1 = LayerNorm(d_model)
@@ -40,7 +43,7 @@ class ResidualAttentionBlock(nn.Module):
 class Transformer(nn.Module):
     """ Transformer Arch """
 
-    def __init__(self, width, layers, heads, attn_mask):
+    def __init__(self, width, layers, heads, attn_mask=None):
         super().__init__()
         self.width = width
         self.layers = layers

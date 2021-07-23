@@ -16,16 +16,16 @@ class LinearHead(nn.Module):
     def __init__(self):
         super().__init__()
 
-        pool_type = cfg.MODEL.HEADS.POOL_LAYER
-        if pool_type == 'avgpool':      
+        self.pool_type = cfg.MODEL.HEADS.POOL_LAYER
+        if self.pool_type == 'avgpool':      
             self.pool_layer = FastGlobalAvgPool2d()
-        elif pool_type == 'maxpool':    
+        elif self.pool_type == 'maxpool':    
             self.pool_layer = nn.AdaptiveMaxPool2d(1)
-        elif pool_type == 'gempool':    
+        elif self.pool_type == 'gempool':    
             self.pool_layer = GeneralizedMeanPoolingP()
-        elif pool_type == "avgmaxpool": 
+        elif self.pool_type == "avgmaxpool": 
             self.pool_layer = AdaptiveAvgMaxPool2d()
-        elif pool_type == "identity":   
+        elif self.pool_type == "identity":   
             self.pool_layer = nn.Identity()
         else:
             raise KeyError(f"{pool_type} is invalid")
@@ -50,7 +50,8 @@ class LinearHead(nn.Module):
 
     def forward(self, features, targets=None):
         global_feat = self.pool_layer(features)
-        global_feat = global_feat[..., 0, 0]
+        if self.pool_type != "identity":
+            global_feat = global_feat[..., 0, 0]
         global_feat = self.embedding_layer(global_feat)
         #if not self.training: return global_feat
         # training
