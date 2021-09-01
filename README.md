@@ -4,7 +4,7 @@
 
 # Introduction
 
-- **2nd** place in Google Landmark Retrieval 2020 Competition. (https://vis-bj.bj.bcebos.com/landmark/landmark2020_retrieval.pdf)
+- **2nd** place in Google Landmark Retrieval 2020 Competition. (https://drive.google.com/file/d/1XnzxMOHhzua9tjrAjo-X55ieKVJzRJw_/view?usp=sharing)
 - Includes **pycls** (https://github.com/facebookresearch/pycls), refer to [`pycls.md`](docs/pycls.md).
 - **pymetric** is written by `DistributedDataParallel` which is different from **fast-reid**. Now mainly includes features such as arcface loss and circle loss, ongoing.
 - Add multicards feature extraction, searching topk and computing mAP.
