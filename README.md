@@ -62,6 +62,15 @@ python tools/train_metric.py \
     PORT 12001 \
     TRAIN.WEIGHTS path/to/pretrainedmodel
 ```
+Resume training: 
+
+```
+python tools/train_metric.py \
+    --cfg configs/metric/R-50-1x64d_step_8gpu.yaml \
+    OUT_DIR ./output \
+    PORT 12001 \
+    TRAIN.AUTO_RESUME True
+```
 
 Extracting features(labels) and evaluation
 ```
