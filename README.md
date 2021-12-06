@@ -82,6 +82,14 @@ Convert to tensorflow2.3 (please refer onnx and onnx-tensorflow)
 examples: tools/convert/torch2onnx.py tools/convert/onnx2tf.py
 ```
 
+## Pretrained weights
+-[resnet50](https://pan.baidu.com/s/1WAGiz5EHJrKT-61m-B322Q) (c3l3)
+
+-[resnet101](https://pan.baidu.com/s/1uzh6_Si-6ZCsoxS1Au8MZQ) (t3ln)
+
+-[resnest269](https://pan.baidu.com/s/1Hf6C9qSuH_qllfizwx5QeA) (3c5a)
+
+
 # Results
 
 **2nd place on Google Landmark Retrieval Challenge 2020**
